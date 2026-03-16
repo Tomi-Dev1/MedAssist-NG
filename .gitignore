@@ -24,6 +24,7 @@ packages/
 
 # API Keys & Secrets - CRUCIAL TO IGNORE!
 appsettings.Development.json
+appsettings.json
 # If you have a specific appsettings container for secrets, ignore it:
 appsettings.*.json
 
