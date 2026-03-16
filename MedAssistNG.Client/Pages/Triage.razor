@@ -1,0 +1,189 @@
+@page "/"
+@inject IJSRuntime JS
+@inject HttpClient Http
+@using MedAssistNG.Client.Models
+@using MedAssistNG.Client.Components
+
+<header class="top-nav">
+    <div class="nav-brand">
+        <div>
+            <h1>MedAssist NG</h1>
+            <p>Live Clinical Triage Co-Pilot</p>
+        </div>
+    </div>
+    <div class="agent-status">
+        <span class="pulse-dot"></span>
+        <span>@(isLoading ? "Analyzing..." : "Agent Standby")</span>
+    </div>
+</header>
+
+<p class="system-mode">
+        AI Agent Mode: Primary Care Triage
+</p>
+
+<main class="workspace">
+
+    <section class="panel">
+        <div class="panel-header"><i class="fa-solid fa-stethoscope"></i> Clinical Input Stream</div>
+        <div class="panel-content">
+
+            <IntakeCard Symptoms="@symptoms"
+                        SymptomsChanged="@(value => symptoms = value)"
+                        IsLoading="@isLoading"
+                        ErrorMessage="@errorMessage"
+                        OnRunTriage="RunAnalysis"
+                        OnImageBase64Changed="OnImagePayloadChanged" />
+
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header"><i class="fa-solid fa-microscope"></i> Live Triage Output</div>
+        <div class="panel-content">
+
+            @if (isLoading)
+            {
+                <div class="ai-thinking">
+                    <div>Analyzing patient symptoms...</div>
+                    <div>Checking infectious disease patterns...</div>
+                    <div>Evaluating clinical danger signs...</div>
+                    <div>Generating triage priority...</div>
+                </div>
+            }
+
+            @if (result == null && !isLoading)
+            {
+                <p style="text-align:center; color: #94a3b8; margin-top: 50px;">
+                    Awaiting clinical input. Upload an image or describe symptoms.
+                </p>
+            }
+
+            @if (result != null)
+            {
+                <TriageResultCard Result="@result" ReportTime="@reportTime" />
+            }
+
+            @if (!string.IsNullOrWhiteSpace(result?.FollowUpQuestion) && result.FollowUpQuestion.Trim().ToLower() != "null")
+            {
+                <FollowUpCard Question="@result?.FollowUpQuestion"
+                              OnSubmit="SubmitFollowUp" />
+            }
+
+        </div>
+    </section>
+
+</main>
+
+@code {
+
+    string symptoms = "";
+    TriageResult? result;
+    bool isLoading = false;
+    DateTime? reportTime;
+
+    string? imageBase64;
+    string? imageContentType;
+    string? errorMessage;
+
+    List<string> conversationHistory = new();
+
+    Task OnImagePayloadChanged(ImagePayload payload)
+    {
+        imageBase64 = payload?.Base64;
+        imageContentType = payload?.ContentType;
+        return Task.CompletedTask;
+    }
+
+    async Task RunAnalysis()
+    {
+        errorMessage = null;
+
+        if (string.IsNullOrWhiteSpace(symptoms))
+        {
+            errorMessage = "Please enter patient symptoms before running triage.";
+            return;
+        }
+
+        try
+        {
+            isLoading = true;
+            result = null;
+
+            var response = await Http.PostAsJsonAsync("api/triage", new
+            {
+                Symptoms = symptoms,
+                ImageBase64 = imageBase64,
+                ImageContentType = imageContentType
+            });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var serverErr = await response.Content.ReadAsStringAsync();
+                errorMessage = "Something went wrong. " + serverErr;
+                return;
+            }
+
+            result = await response.Content.ReadFromJsonAsync<TriageResult>();
+            reportTime = DateTime.Now;
+        }
+        catch
+        {
+            errorMessage = "Unexpected error occurred.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    async Task SubmitFollowUp(string answer)
+    {
+        if (string.IsNullOrWhiteSpace(answer))
+            return;
+
+        try
+        {
+            errorMessage = null;
+            isLoading = true;
+            result = null; // Clear old result to show "AI Thinking"
+            
+            // 1. Update the clinical input box immediately with the additional info
+            symptoms += $"\n\n[Follow-up Info]: {answer}";
+            
+            // 2. Automated navigation: Scroll back to the top of the output panel
+            await JS.InvokeVoidAsync("scrollToOutput");
+
+            // 3. Prepare full conversation context
+            conversationHistory.Add($"Follow-up response: {answer}");
+            var combinedContext = symptoms + "\n" + string.Join("\n", conversationHistory);
+
+            // 4. Re-analyze with new context
+            var response = await Http.PostAsJsonAsync("api/triage", new
+            {
+                Symptoms = combinedContext,
+                ImageBase64 = imageBase64,
+                ImageContentType = imageContentType
+            });
+
+            if (response.IsSuccessStatusCode)
+            {
+                result = await response.Content.ReadFromJsonAsync<TriageResult>();
+                reportTime = DateTime.Now;
+            }
+            else
+            {
+                var serverErr = await response.Content.ReadAsStringAsync();
+                errorMessage = "AI re-analysis failed: " + serverErr;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Unexpected error submitting follow-up: " + ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+}

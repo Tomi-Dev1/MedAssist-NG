@@ -11,10 +11,6 @@ tmp_probe/
 [Bb]in/
 [Oo]bj/
 build.log
-build_errors.txt
-build_errors_detailed.txt
-build_errors_utf8.txt
-build_output.txt
 compiler_errors.txt
 errors.log
 *.log

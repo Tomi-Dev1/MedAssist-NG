@@ -1,0 +1,128 @@
+@using MedAssistNG.Client.Models
+@using MedAssistNG.Client.Services
+@inject VoiceService VoiceService
+
+<div class="intake-form-container">
+
+    <div class="input-group">
+        <label>Patient Symptoms & Clinical Notes</label>
+
+        <textarea value="@Symptoms"
+                  @onchange="@(e => SymptomsChanged.InvokeAsync(e.Value?.ToString() ?? ""))"
+                  placeholder="E.g., Fever for 3 days, vomiting, fatigue, and abdominal pain."
+                  disabled="@IsLoading">
+        </textarea>
+    </div>
+
+    <div class="input-group upload-group">
+        <label>Diagnostic Image (Optional)</label>
+
+        <div class="file-upload-wrapper">
+            <InputFile OnChange="HandleFileSelected"
+                       class="custom-file-input"
+                       disabled="@IsLoading" />
+        </div>
+
+        @if (!string.IsNullOrEmpty(selectedFileName))
+        {
+            <div class="file-name-display">📎 @selectedFileName attached</div>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="error-banner">@ErrorMessage</div>
+    }
+
+    <!-- BUTTON GROUP -->
+    <div class="triage-actions">
+
+        <button class="btn voice-btn"
+                @onclick="StartVoice"
+                disabled="@IsLoading">
+            🎤 Dictate Symptoms
+        </button>
+
+        <button class="btn run-btn"
+                @onclick="OnRunTriage"
+                disabled="@IsLoading">
+
+            @if (IsLoading)
+            {
+                <span class="spinner"></span>
+                <span>Processing Multimodal Stream...</span>
+            }
+            else
+            {
+                <span>⚡ Run AI Triage</span>
+            }
+
+        </button>
+
+    </div>
+
+</div>
+
+@code {
+
+    [Parameter] public string Symptoms { get; set; } = "";
+    [Parameter] public EventCallback<string> SymptomsChanged { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string? ErrorMessage { get; set; }
+    [Parameter] public EventCallback OnRunTriage { get; set; }
+    [Parameter] public EventCallback<ImagePayload> OnImageBase64Changed { get; set; }
+
+    private string? selectedFileName;
+
+    DotNetObjectReference<IntakeCard>? objRef;
+
+    protected override void OnInitialized()
+    {
+        objRef = DotNetObjectReference.Create(this);
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        if (file != null)
+        {
+            selectedFileName = file.Name;
+
+            var buffer = new byte[file.Size];
+
+            await file
+                .OpenReadStream(maxAllowedSize: 10 * 1024 * 1024)
+                .ReadAsync(buffer);
+
+            var base64 = Convert.ToBase64String(buffer);
+
+            await OnImageBase64Changed.InvokeAsync(new ImagePayload
+            {
+                Base64 = base64,
+                ContentType = file.ContentType
+            });
+        }
+    }
+
+    private async Task StartVoice()
+    {
+        try
+        {
+            if (objRef != null)
+            {
+                await VoiceService.StartListening(objRef);
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "Voice recognition error: " + ex.Message;
+        }
+    }
+
+    [JSInvokable]
+    public async Task ReceiveVoiceText(string text)
+    {
+        await SymptomsChanged.InvokeAsync(text);
+    }
+}

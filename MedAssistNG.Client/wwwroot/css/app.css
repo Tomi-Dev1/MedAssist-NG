@@ -1,0 +1,560 @@
+/* --- 1. Soft Modern Variables --- */
+:root {
+    --bg-body: #0b1120; /* Very deep, soft slate blue (not pitch black) */
+    --bg-nav: rgba(15, 23, 42, 0.85); /* Translucent glass effect */
+    --bg-panel: #1e293b; /* Slightly lighter panel background */
+    --bg-input: #0f172a; /* Darker inset for inputs */
+    --border-color: #334155;
+    --border-highlight: #475569;
+    --accent-blue: #3b82f6;
+    --accent-hover: #2563eb;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden; /* Prevent global scrollbar */
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #0b1120;
+    /* Premium Animated Background */
+    background: radial-gradient(circle at 50% 50%, #1e293b 0%, #0b1120 100%) fixed;
+    color: var(--text-main);
+}
+/* --- 2. The Full-Screen Fix --- */
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    align-items: stretch;
+    justify-content: flex-start;
+}
+
+/* Ensure app-wrapper takes full space after load */
+.app-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Center loading state specifically */
+#app:empty + .loading-progress,
+#app > .loading-progress,
+#app:empty + .loading-progress-text,
+#app > .loading-progress-text {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+}
+
+#app:empty + .loading-progress,
+#app > .loading-progress {
+    top: calc(50% - 40px);
+}
+
+#app:empty + .loading-progress-text,
+#app > .loading-progress-text {
+    top: calc(50% + 40px);
+    width: 100%;
+}
+
+/* --- 3. Glassmorphism Header --- */
+.top-nav {
+    height: 70px;
+    flex-shrink: 0;
+    background: var(--bg-nav);
+    backdrop-filter: blur(12px); /* Creates the frosted glass look */
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 32px;
+    z-index: 10;
+}
+
+.nav-brand h1 {
+    font-family: 'Outfit', sans-serif;
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.02em;
+}
+
+.nav-brand p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.agent-status {
+    background: var(--bg-input);
+    border: 1px solid var(--border-highlight);
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pulse-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+    animation: pulse 1.5s infinite alternate;
+}
+
+@keyframes pulse {
+    from {
+        opacity: 0.5;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+/* --- 4. Floating Workspace Panels --- */
+.workspace {
+    flex: 1;
+    display: flex;
+    gap: 24px;
+    padding: 24px 32px;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.panel {
+    flex: 1;
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 16px; /* Massive upgrade to modern UI */
+    display: flex;
+    min-height: 0; /* Fixes overflow issues in flex containers */
+    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Soft shadow to lift it off the background */
+}
+
+.panel-header {
+    font-family: 'Outfit', sans-serif;
+    height: 60px;
+    flex-shrink: 0;
+    background-color: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: white;
+}
+.panel-header i {
+    margin-right: 12px;
+    color: var(--accent-blue);
+}
+
+.panel-content {
+    overflow-y: auto;
+    min-height: 0;
+    height: 100%;
+    scroll-behavior: smooth;
+    flex: 1;
+    padding: 32px;
+}
+
+/* --- 5. Polished Inputs & Buttons --- */
+.intake-form-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.input-group label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+textarea {
+    background-color: var(--bg-input);
+    color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 18px;
+    width: 100%;
+    min-height: 180px;
+    resize: vertical;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    transition: all 0.2s;
+}
+
+    textarea:focus {
+        outline: none;
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+.file-upload-wrapper {
+    background: var(--bg-input);
+    border: 1px dashed var(--border-highlight);
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+    .file-upload-wrapper:hover {
+        border-color: var(--accent-blue);
+        background: rgba(59, 130, 246, 0.05);
+    }
+
+.btn {
+    background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+    color: white;
+    border: none;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: auto;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+    transition: all 0.2s;
+}
+
+    .btn:hover {
+        transform: translateY(-3px) scale(1.01);
+        box-shadow: 0 10px 30px rgba(59,130,246,.45);
+        filter: brightness(1.08);
+    }
+
+#blazor-error-ui {
+    display: none !important;
+}
+
+/* --- Live Triage Output Styles --- */
+
+@keyframes triageReveal {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.triage-result-container {
+    animation: triageReveal .5s ease-out;
+}
+
+.system-mode {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-top: 4px;
+    padding: 0 32px;
+}
+
+/* Dynamic Urgency Banner */
+.triage-header-banner {
+    padding: 18px 24px;
+    border-radius: 12px;
+    margin-bottom: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+}
+
+    /* Color States based on the string value (red, yellow, green) */
+    .triage-header-banner.red {
+        background: rgba(239, 68, 68, 0.15);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+        .triage-header-banner.red .status-dot {
+            background: #ef4444;
+            box-shadow: 0 0 10px #ef4444;
+        }
+
+    .triage-header-banner.yellow {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fcd34d;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+        .triage-header-banner.yellow .status-dot {
+            background: #f59e0b;
+            box-shadow: 0 0 10px #f59e0b;
+        }
+
+    .triage-header-banner.green {
+        background: rgba(16, 185, 129, 0.15);
+        color: #6ee7b7;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+        .triage-header-banner.green .status-dot {
+            background: #10b981;
+            box-shadow: 0 0 10px #10b981;
+        }
+
+.urgency-indicator {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.timestamp {
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+/* Clinical Text Sections */
+.clinical-section {
+    margin-bottom: 28px;
+}
+
+    .clinical-section h3 {
+        font-size: 13px;
+        text-transform: uppercase;
+        color: var(--border-highlight);
+        margin-bottom: 12px;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px;
+    }
+
+    .clinical-section p {
+        font-size: 15px;
+        line-height: 1.6;
+        color: var(--text-main);
+        margin: 0;
+    }
+
+.critical-alert {
+    background: #7f1d1d;
+    border: 1px solid #ef4444;
+    color: #fecaca;
+    padding: 14px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-weight: 600;
+    animation: alertPulse 1.5s infinite;
+}
+
+@keyframes alertPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239,68,68,.5)
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(239,68,68,0)
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(239,68,68,0)
+    }
+}
+
+/* Danger Signs Box */
+.danger-signs {
+    background: rgba(239, 68, 68, 0.05);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px dashed rgba(239, 68, 68, 0.3);
+}
+
+    .danger-signs h3 {
+        color: #fca5a5;
+        border-bottom: none;
+        margin-bottom: 12px;
+        padding-bottom: 0;
+    }
+
+    .danger-signs ul {
+        margin: 0;
+        padding-left: 20px;
+        color: #f8fafc;
+        line-height: 1.6;
+    }
+
+    .danger-signs li {
+        margin-bottom: 6px;
+    }
+
+.ai-thinking {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-top: 40px;
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+    .ai-thinking div {
+        padding: 10px 14px;
+        border-left: 3px solid var(--accent-blue);
+        background: rgba(59,130,246,0.05);
+        border-radius: 6px;
+    }
+.confidence-meter {
+    margin-bottom: 25px;
+}
+
+    .confidence-meter span {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+.confidence-bar {
+    height: 6px;
+    background: #1e293b;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 6px;
+}
+
+.confidence-fill {
+    height: 100%;
+    background: linear-gradient(90deg,#3b82f6,#10b981);
+}
+
+.clinical-followup {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+    .clinical-followup .followup-header {
+        font-size: 15px;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+    }
+
+    .clinical-followup textarea {
+        margin-top: 10px;
+    }
+
+.triage-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 20px;
+}
+
+.voice-btn {
+    background: linear-gradient(135deg,#10b981,#059669);
+}
+
+    .voice-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16,185,129,.35);
+        background: linear-gradient(135deg,#10b981,#059669);
+    }
+.run-btn {
+    background: linear-gradient(135deg,#3b82f6,#2563eb);
+}
+
+/* Disclaimer */
+.safety-disclaimer {
+    display: flex;
+    gap: 12px;
+    background: rgba(59, 130, 246, 0.05);
+    padding: 16px;
+    border-radius: 8px;
+    border-left: 4px solid var(--accent-blue);
+    margin-top: 40px;
+}
+
+    .safety-disclaimer p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+
+/* --- 8. Loading Progress Overrides --- */
+.loading-progress {
+    position: relative;
+    display: block;
+    width: 60px;
+    height: 60px;
+    border: 5px solid rgba(59, 130, 246, 0.1);
+    border-top: 5px solid var(--accent-blue);
+    border-radius: 50%;
+    animation: loading-spin 1s linear infinite;
+}
+
+@keyframes loading-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.loading-progress-text {
+    position: relative;
+    text-align: center;
+    font-weight: 600;
+    font-family: 'Outfit', sans-serif;
+    color: var(--text-muted);
+    margin-top: 24px;
+    letter-spacing: 0.05em;
+}
+
+.loading-progress-text:after {
+    content: "INITIALIZING CLINICAL AGENT...";
+}
+
+.app-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}

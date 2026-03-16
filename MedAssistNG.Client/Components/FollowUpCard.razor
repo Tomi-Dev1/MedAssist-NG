@@ -1,0 +1,41 @@
+﻿@if (!string.IsNullOrWhiteSpace(Question))
+{
+    <div class="followup-card clinical-followup">
+
+        <div class="followup-header">
+            Additional Clinical Question
+        </div>
+
+        <p class="followup-question">@Question</p>
+
+        <textarea class="followup-input"
+                  @bind="Answer"
+                  @bind:event="oninput"
+                  placeholder="Enter additional patient symptoms or findings..."
+                  rows="3"></textarea>
+
+        <button class="btn run-btn" @onclick="Submit">
+            Submit Response
+        </button>
+
+    </div>
+}
+
+@code {
+
+    [Parameter] public string? Question { get; set; }
+
+    [Parameter] public EventCallback<string> OnSubmit { get; set; }
+
+    string Answer = "";
+
+    async Task Submit()
+    {
+        if (!string.IsNullOrWhiteSpace(Answer))
+        {
+            await OnSubmit.InvokeAsync(Answer);
+            Answer = "";
+        }
+    }
+
+}
