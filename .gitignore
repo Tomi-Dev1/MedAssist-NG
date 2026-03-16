@@ -1,0 +1,42 @@
+# Visual Studio & Local IDE Settings
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+tmp_probe/
+
+# Build Results (bin and obj directories for all projects)
+[Bb]in/
+[Oo]bj/
+build.log
+build_errors.txt
+build_errors_detailed.txt
+build_errors_utf8.txt
+build_output.txt
+compiler_errors.txt
+errors.log
+*.log
+
+# NuGet Packages
+*.nupkg
+.nuget/
+packages/
+*.local.nupkg
+.paket/
+
+# API Keys & Secrets - CRUCIAL TO IGNORE!
+appsettings.Development.json
+# If you have a specific appsettings container for secrets, ignore it:
+appsettings.*.json
+
+# If you use the Secret Manager tool in .NET, they are stored outside this project folder anyway,
+# but it's good practice to ensure appsettings.Development.json isn't tracked.
+
+# Other common ignores
+*.psess
+*.vspx
+*.sap
+*.DS_Store
+Thumbs.db
